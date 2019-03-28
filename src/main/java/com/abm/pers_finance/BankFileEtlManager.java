@@ -24,7 +24,7 @@ public final class BankFileEtlManager {
 
 /**
 *This is a public utililty function to read the bank files into the database.
-/*
+*/
     public static void readFiles() {
         String inputPath = "../../../input";
         String firstColumnHeader;
@@ -34,9 +34,9 @@ public final class BankFileEtlManager {
         File[] directoryListing = dir.listFiles();
         if (directoryListing != null) {
         for (File child : directoryListing) {
-            try(Scanner in = new Scanner(child)){
-                firstColumnHeader= in.nextLine().split(",")[0];
-                    if (firstColumnHeader=="Details"){
+            try (Scanner in = new Scanner(child)) {
+                firstColumnHeader = in.nextLine().split(",")[0];
+                    if (firstColumnHeader == "Details") {
                         importDebitFile(child, in);
                     }
                 } catch (IOException e) {
