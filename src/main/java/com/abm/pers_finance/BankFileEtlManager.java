@@ -21,19 +21,6 @@ public final class BankFileEtlManager {
     }
 
     /**
-     * This is the main function to trigger the  bank ETL
-     * during developement. Will be replaced later.
-     *
-     * @param args the command line args, which are unused.
-     */
-    public static void main(final String[] args) {
-        String username = args[0];
-        String password = args[1];
-        readFiles(username, password);
-
-    }
-
-    /**
      * This is a public utililty function to read the bank files into the database.
      */
     public static void readFiles(String username, String password) {
