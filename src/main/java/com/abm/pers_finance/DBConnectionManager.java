@@ -1,15 +1,8 @@
 package com.abm.pers_finance;
 
-
-import com.opencsv.CSVWriter;
-
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 
 /**
 *This class managers the creation of JDBC connections to the database.
@@ -17,7 +10,8 @@ import java.sql.*;
 public final class DBConnectionManager {
 
     /**
-     * This is a private constructor to prevent subclassing of this singleton class.
+     * This is a private constructor to prevent subclassing
+     * of this singleton class.
      */
     private DBConnectionManager() {
     }
@@ -31,7 +25,8 @@ public final class DBConnectionManager {
      * @param password the database password
      * @return JDBC connection to postgresql database.
      */
-    public static Connection getDBConnection(final String username, final String password) {
+    public static Connection getDBConnection(
+            final String username, final String password) {
 
         try {
             Class.forName("org.postgresql.Driver");
@@ -42,8 +37,8 @@ public final class DBConnectionManager {
 
         try {
             connection = DriverManager.getConnection(
-                    "jdbc:postgresql://localhost:5432/postgres", username,
-                    password);
+              "jdbc:postgresql://localhost:5432/postgres",
+                    username, password);
 
             return connection;
 

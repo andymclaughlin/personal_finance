@@ -12,7 +12,7 @@ import java.util.Scanner;
 /**
 * This class handles ETL of the bank credit and debit transactions.
 */
-final class BankFileEtlManager {
+public final class BankFileEtlManager {
 
     /**
      * This is a private constructor to enforce class as Singleton.
