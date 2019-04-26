@@ -12,24 +12,24 @@ import java.util.Scanner;
 /**
 * This class handles ETL of the bank credit and debit transactions.
 */
-public final class BankFileEtlManager {
+final class BankFileEtlManager {
 
     /**
-     * This is a private contructor to enforce class as Singleton.
+     * This is a private constructor to enforce class as Singleton.
      */
     private void BankFileEtlManger() {
     }
 
     /**
-     * This is a public utililty function to read the bank
+     * This is a public utility function to read the bank
      * files into the database.
      * @param username The database username.
      * @param password The database password.
     */
-    public static void readFiles(final String username, final String password) {
+    static void readFiles(final String username, final String password) {
         String inputPath = System.getProperty("user.dir") + "/bank_files";
         String firstColumnHeader;
-        Boolean isDebit;
+
 
         File dir = new File(inputPath);
         File[] directoryListing = dir.listFiles();
@@ -40,7 +40,7 @@ public final class BankFileEtlManager {
                     if (firstColumnHeader.equals("Details")) {
                         importDebitFile(child, in, username, password);
                     } else {
-                        importCreditFile(child, in, username, password);
+                        importCreditFile(in, username, password);
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -73,7 +73,7 @@ public final class BankFileEtlManager {
         boolean hasNext;
         String l;
 
-        Connection conn = null;
+        Connection conn;
         PreparedStatement ps = null;
 
         String clearTableSql = "delete from public.debit_trans";
@@ -88,13 +88,13 @@ public final class BankFileEtlManager {
 
         while ((l = in.nextLine()) != null) {
             String[] line = l.split(",(?=([^\"]*\"[^\"]*\")*[^\"]*$)");
-            i = 0
+            i = 0;
             details = line[i];
             postDate = line[i++];
             description = line[i++];
             amount = Double.parseDouble(line[i++]);
             type = line[i++];
-            balance = Double.parseDouble(line[i++]);
+            balance = Double.parseDouble(line[i]);
             SimpleDateFormat format = new SimpleDateFormat("MM/dd/yyyy");
             Date parsed = null;
             try {
@@ -110,7 +110,7 @@ public final class BankFileEtlManager {
                     + "(?,?,?,?, ?, ?)";
 
             try {
-                i = 1
+                i = 1;
                 ps = conn.prepareStatement(sql);
                 ps.setString(i++, details);
 
@@ -118,7 +118,7 @@ public final class BankFileEtlManager {
                 ps.setString(i++, description);
                 ps.setDouble(i++, amount);
                 ps.setString(i++, type);
-                ps.setDouble(i++, balance);
+                ps.setDouble(i, balance);
 
 
                 ps.executeUpdate();
@@ -140,18 +140,18 @@ public final class BankFileEtlManager {
 
 
             }
-            hasNext = in.hasNext()
+            hasNext = in.hasNext();
             if (!hasNext) {
                 break;
             }
         }
-        if (conn != null) {
-            try {
-                conn.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+
+        try {
+            conn.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
+
 
     }
 
@@ -159,14 +159,12 @@ public final class BankFileEtlManager {
     /**
      * This is a helper function to import the credit card file.
      *
-     * @param f  the file pointer to csv file for import.
-     *           The cursor should be after the csv header.
      * @param in the active Scanner pointer.
      * @param username the database username.
      * @param password the database password.
      */
-    private static void importCreditFile(final File f,
-       final Scanner in, final String username, final String password) {
+    private static void importCreditFile(final Scanner in,
+              final String username, final String password) {
         String tranDate;
         String postDate;
         String description;
@@ -174,7 +172,7 @@ public final class BankFileEtlManager {
         String type;
         double amount;
         String l;
-        Connection conn = null;
+        Connection conn;
         conn = DBConnectionManager.getDBConnection(username, password);
         int i;
 
@@ -182,13 +180,13 @@ public final class BankFileEtlManager {
 
         while ((l = in.nextLine()) != null) {
             String[] line = l.split(",(?=([^\"]*\"[^\"]*\")*[^\"]*$)");
-            i = 0
+            i = 0;
             tranDate = line[i++];
             postDate = line[i++];
             description = line[i++];
             category = line[i++];
             type = line[i++];
-            amount = Double.parseDouble(line[i++]);
+            amount = Double.parseDouble(line[i]);
             SimpleDateFormat format = new SimpleDateFormat("MM/dd/yyyy");
             Date parsedTranDate = null;
             Date parsedPostDate = null;
@@ -198,8 +196,11 @@ public final class BankFileEtlManager {
             } catch (ParseException e) {
                 e.printStackTrace();
             }
+
             java.sql.Date tranDateSql = new java.sql.Date(
                 parsedTranDate.getTime());
+
+
             java.sql.Date postDateSql = new java.sql.Date(
                 parsedPostDate.getTime());
 
@@ -217,7 +218,7 @@ public final class BankFileEtlManager {
                 ps.setString(i++, description);
                 ps.setString(i++, category);
                 ps.setString(i++, type);
-                ps.setDouble(i++, amount);
+                ps.setDouble(i, amount);
 
 
                 ps.executeUpdate();
@@ -230,7 +231,9 @@ public final class BankFileEtlManager {
             } finally {
 
                 try {
-                    ps.close();
+                    if (ps != null) {
+                        ps.close();
+                    }
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
