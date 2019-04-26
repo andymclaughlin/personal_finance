@@ -4,7 +4,7 @@ If another postgresql instance may be running, check using the following command
 
 lsof -i :5432
 
-This will list the instanes running. If  another instance is running it can be ended by
+This will list the instances running. If  another instance is running it can be ended by
 
 kill [pid]
 
@@ -20,3 +20,8 @@ java -jar target/personal_finance-1.0-SNAPSHOT-jar-with-dependencies.jar
 to log into psql
 psql -h localhost -U postgres -d postgres
 
+to list tables
+\dt public.*
+
+to list schemas
+\dv public.*

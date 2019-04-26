@@ -21,9 +21,12 @@ public final class BankFileEtlManager {
     }
 
     /**
-     * This is a public utililty function to read the bank files into the database.
-     */
-    public static void readFiles(String username, String password) {
+     * This is a public utililty function to read the bank
+     * files into the database.
+     * @param username The database username.
+     * @param password The database password.
+    */
+    public static void readFiles(final String username, final String password) {
         String inputPath = System.getProperty("user.dir") + "/bank_files";
         String firstColumnHeader;
         Boolean isDebit;
@@ -36,7 +39,7 @@ public final class BankFileEtlManager {
                     firstColumnHeader = in.nextLine().split(",")[0];
                     if (firstColumnHeader.equals("Details")) {
                         importDebitFile(child, in, username, password);
-                    } else{
+                    } else {
                         importCreditFile(child, in, username, password);
                     }
                 } catch (IOException e) {
@@ -54,9 +57,11 @@ public final class BankFileEtlManager {
      * @param f  the file pointer to csv file for import.
      *           The cursor should be after the csv header.
      * @param in the active Scanner pointer.
-     */
+     * @param username the database username.
+     * @param password the database password.
+    */
     private static void importDebitFile(final File f, final Scanner in,
-                                        String username, String password) {
+         final String username, final String password) {
 
         String details;
         String postDate;
@@ -64,7 +69,8 @@ public final class BankFileEtlManager {
         double amount;
         String type;
         double balance;
-
+        int i;
+        boolean hasNext;
         String l;
 
         Connection conn = null;
@@ -82,12 +88,13 @@ public final class BankFileEtlManager {
 
         while ((l = in.nextLine()) != null) {
             String[] line = l.split(",(?=([^\"]*\"[^\"]*\")*[^\"]*$)");
-            details = line[0];
-            postDate = line[1];
-            description = line[2];
-            amount = Double.parseDouble(line[3]);
-            type = line[4];
-            balance = Double.parseDouble(line[5]);
+            i = 0
+            details = line[i];
+            postDate = line[i++];
+            description = line[i++];
+            amount = Double.parseDouble(line[i++]);
+            type = line[i++];
+            balance = Double.parseDouble(line[i++]);
             SimpleDateFormat format = new SimpleDateFormat("MM/dd/yyyy");
             Date parsed = null;
             try {
@@ -98,19 +105,20 @@ public final class BankFileEtlManager {
             java.sql.Date postDateSql = new java.sql.Date(parsed.getTime());
 
             String sql = "INSERT INTO public.debit_trans"
-                    + "(details, posting_date, description, amount, type, balance) VALUES"
+                    + "(details, posting_date, description, amount,"
+                    + " type, balance) VALUES"
                     + "(?,?,?,?, ?, ?)";
 
             try {
-
+                i = 1
                 ps = conn.prepareStatement(sql);
-                ps.setString(1, details);
+                ps.setString(i++, details);
 
-                ps.setDate(2, postDateSql);
-                ps.setString(3, description);
-                ps.setDouble(4, amount);
-                ps.setString(5, type);
-                ps.setDouble(6, balance);
+                ps.setDate(i++, postDateSql);
+                ps.setString(i++, description);
+                ps.setDouble(i++, amount);
+                ps.setString(i++, type);
+                ps.setDouble(i++, balance);
 
 
                 ps.executeUpdate();
@@ -132,7 +140,8 @@ public final class BankFileEtlManager {
 
 
             }
-            if (in.hasNext() == false) {
+            hasNext = in.hasNext()
+            if (!hasNext) {
                 break;
             }
         }
@@ -153,8 +162,11 @@ public final class BankFileEtlManager {
      * @param f  the file pointer to csv file for import.
      *           The cursor should be after the csv header.
      * @param in the active Scanner pointer.
+     * @param username the database username.
+     * @param password the database password.
      */
-    private static void importCreditFile(final File f, final Scanner in, final String username, final String password) {
+    private static void importCreditFile(final File f,
+       final Scanner in, final String username, final String password) {
         String tranDate;
         String postDate;
         String description;
@@ -164,17 +176,19 @@ public final class BankFileEtlManager {
         String l;
         Connection conn = null;
         conn = DBConnectionManager.getDBConnection(username, password);
+        int i;
 
         PreparedStatement ps = null;
 
         while ((l = in.nextLine()) != null) {
             String[] line = l.split(",(?=([^\"]*\"[^\"]*\")*[^\"]*$)");
-            tranDate = line[0];
-            postDate = line[1];
-            description = line[2];
-            category = line[3];
-            type = line[4];
-            amount = Double.parseDouble(line[5]);
+            i = 0
+            tranDate = line[i++];
+            postDate = line[i++];
+            description = line[i++];
+            category = line[i++];
+            type = line[i++];
+            amount = Double.parseDouble(line[i++]);
             SimpleDateFormat format = new SimpleDateFormat("MM/dd/yyyy");
             Date parsedTranDate = null;
             Date parsedPostDate = null;
@@ -184,22 +198,26 @@ public final class BankFileEtlManager {
             } catch (ParseException e) {
                 e.printStackTrace();
             }
-            java.sql.Date tranDateSql = new java.sql.Date(parsedTranDate.getTime());
-            java.sql.Date postDateSql = new java.sql.Date(parsedPostDate.getTime());
+            java.sql.Date tranDateSql = new java.sql.Date(
+                parsedTranDate.getTime());
+            java.sql.Date postDateSql = new java.sql.Date(
+                parsedPostDate.getTime());
 
             String sql = "INSERT INTO public.credit_trans"
-                    + "(tran_date, post_date, description, category, tran_type, amount) VALUES"
+                    + "(tran_date, post_date, description,"
+                    + " category, tran_type, amount) VALUES"
                     + "(?,?,?,?, ?, ?)";
 
             try {
 
                 ps = conn.prepareStatement(sql);
-                ps.setDate(1, tranDateSql);
-                ps.setDate(2, postDateSql);
-                ps.setString(3, description);
-                ps.setString(4, category);
-                ps.setString(5, type);
-                ps.setDouble(6, amount);
+                i = 1;
+                ps.setDate(i++, tranDateSql);
+                ps.setDate(i++, postDateSql);
+                ps.setString(i++, description);
+                ps.setString(i++, category);
+                ps.setString(i++, type);
+                ps.setDouble(i++, amount);
 
 
                 ps.executeUpdate();
@@ -211,17 +229,14 @@ public final class BankFileEtlManager {
 
             } finally {
 
-                if (ps != null) {
-                    try {
-                        ps.close();
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
+                try {
+                    ps.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
                 }
 
-
             }
-            if (in.hasNext() == false) {
+            if (!in.hasNext()) {
                 break;
             }
         }
