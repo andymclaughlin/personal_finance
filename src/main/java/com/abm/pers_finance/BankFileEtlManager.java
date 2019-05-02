@@ -89,7 +89,7 @@ public final class BankFileEtlManager {
         while ((l = in.nextLine()) != null) {
             String[] line = l.split(",(?=([^\"]*\"[^\"]*\")*[^\"]*$)");
             i = 0;
-            details = line[i];
+            details = line[i++];
             postDate = line[i++];
             description = line[i++];
             amount = Double.parseDouble(line[i++]);

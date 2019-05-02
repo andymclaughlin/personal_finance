@@ -39,7 +39,8 @@ public final class CliQueryManager {
         PreparedStatement ps = null;
         String tranDescrip = "";
         String nextSql = "select description, amount, tran_count"
-               + " from public.top_unmapped_description";
+                + " closest_mapped_descrip, similarity, acct_code"
+                + " from public.top_unmapped_description";
 
         conn = DBConnectionManager.getDBConnection(username, password);
         try {
